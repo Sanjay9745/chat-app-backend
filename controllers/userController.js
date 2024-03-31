@@ -93,8 +93,14 @@ const GetChatByUser = async (req, res) => {
 };
 const DeleteAllChat = async (req, res) => {
   try {
-    const { sender_id, receiver_id } = req.body;
-    await Chat.deleteMany({ sender_id, receiver_id });
+    const { receiver_id } = req.body;
+    const sender_id = req.user.id;
+    await Chat.deleteMany({
+      $or: [
+        { sender_id, receiver_id },
+        { sender_id: receiver_id, receiver_id: sender_id },
+      ],
+    });
     res.status(200).json({ message: "Chat deleted successfully" });
   } catch (error) {
     console.log(error);
@@ -117,9 +123,9 @@ const UpdateChat = async (req, res) => {
 };
 const DeleteSingleChat = async (req, res) => {
   try {
-    const { sender_id, receiver_id } = req.body;
-    await Chat.deleteOne({ sender_id, receiver_id });
-    res.status(200).json({ message: "Chat deleted successfully" });
+    const chat = await Chat.findById(req.params.id);
+    await Chat.deleteOne({ _id: req.params.id });
+    res.status(200).json({ message: "Chat deleted successfully" ,chat});
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

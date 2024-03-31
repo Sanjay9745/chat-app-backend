@@ -42,7 +42,6 @@ const io = socketIO(server, {
     allowedHeaders: ["my-custom-header"],
     credentials: true,
   },
-
 });
 
 // Create namespace
@@ -55,7 +54,7 @@ chat.use((socket, next) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       // If the token is not valid, disconnect the client
-      return next(new Error('Authentication error'));
+      return next(new Error("Authentication error"));
     }
 
     // If the token is valid, store the decoded token in the socket object
@@ -68,48 +67,81 @@ chat.use((socket, next) => {
 // Handle connections to the '/chat' namespace
 chat.on("connection", async (socket) => {
   console.log("New user connected to chat namespace");
-  socket.on("join",async (data) => {
+  socket.on("join", async (data) => {
     // Handle user connection logic
-    console.log("join")
+    console.log("join");
     // console.log(socket.user)
     try {
-        const user  = await User.updateOne({_id:socket.user.id},{is_online:"1",socket_id:socket.id});
-        socket.broadcast.emit("setUserOnline", socket.user.id);
+      const user = await User.updateOne(
+        { _id: socket.user.id },
+        { is_online: "1", socket_id: socket.id }
+      );
+      socket.broadcast.emit("setUserOnline", socket.user.id);
     } catch (error) {
-        console.log(error);
+      console.log(error);
     }
   });
-  socket.on("leave",async (data) => {
+  socket.on("leave", async (data) => {
     // Handle user disconnection logic
     socket.broadcast.emit("setUserOffline", data.userId);
-    console.log("leave")
-      try {
-          const user  = await User.updateOne({_id:socket.user.id},{is_online:"0"});
-            socket.broadcast.emit("setUserOffline", socket.user.id);
-      } catch (error) {
-          console.log(error);
-      }
+    console.log("leave");
+    try {
+      const user = await User.updateOne(
+        { _id: socket.user.id },
+        { is_online: "0" }
+      );
+      socket.broadcast.emit("setUserOffline", socket.user.id);
+    } catch (error) {
+      console.log(error);
+    }
   });
   // Handle incoming messages
   socket.on("message", async (data) => {
     // Log the message data
-  
+
     // Get the receiver's socket ID from the database
-    const user = await User.findOne({_id: data.receiver_id}).select("socket_id");
-  
+    const user = await User.findOne({ _id: data.receiver_id }).select(
+      "socket_id"
+    );
+
     // Check if the user and the socket ID exist
     if (user && user.socket_id) {
       // Send the message to the specific client
       socket.to(user.socket_id).emit("message", data);
     } else {
-      console.log(`User not found or socket ID not set for user: ${data.receiver_id}`);
+      console.log(
+        `User not found or socket ID not set for user: ${data.receiver_id}`
+      );
     }
   });
-  
+  socket.on("deleteMessage", async (data) => {
+    // Log the message data
+
+    // Get the receiver's socket ID from the database
+    const user = await User.findOne({ _id: data.receiver_id }).select(
+      "socket_id"
+    );
+    socket.to(user.socket_id).emit("deleteMessage", data);
+  });
+  //Handle Dlete All Chat
+  socket.on("deleteAllChat", async (data) => {
+    // Log the message data
+
+    // Get the receiver's socket ID from the database
+    const user = await User.findOne({ _id: data }).select(
+      "socket_id"
+    );
+    socket.to(user.socket_id).emit("deleteAllChat", data);
+  });
+  //handle typing
+  socket.on("typing", async (data) => {
+
+    // Log the message data
+      socket.broadcast.emit("typing", data);
+  })
   // Handle disconnections
   socket.on("disconnect", async () => {
     console.log("User disconnected from chat namespace");
-   
   });
 });
 

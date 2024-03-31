@@ -13,6 +13,6 @@ router.post('/update',userAuth,userController.UpdateUser);
 router.post('/add-chat',userAuth,userController.AddChat);
 router.post('/delete-all-chat',userAuth,userController.DeleteAllChat);
 router.post('/update-chat',userAuth,userController.UpdateChat);
-router.post('/delete-single-chat',userAuth,userController.DeleteSingleChat);
+router.delete('/delete-single-chat/:id',userAuth,userController.DeleteSingleChat);
 
 module.exports = router;
