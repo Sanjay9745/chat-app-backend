@@ -134,11 +134,12 @@ chat.on("connection", async (socket) => {
     socket.to(user.socket_id).emit("deleteAllChat", data);
   });
   //handle typing
-  socket.on("typing", async (data) => {
+  socket.on("typing", (data) => {
 
-    // Log the message data
-      socket.broadcast.emit("typing", data);
-  })
+    // Broadcast the typing status to other clients
+    socket.broadcast.emit("typing", data);
+  });
+  
   // Handle disconnections
   socket.on("disconnect", async () => {
     console.log("User disconnected from chat namespace");
