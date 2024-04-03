@@ -14,16 +14,25 @@ const userSchema = new Schema({
         type: String,
         required: true,
     },
-    is_online:{
+    is_online: {
         type: String,
-        default: "0"
+        default: "0" // Change to Boolean type
     },
-    socket_id:{
+    socket_id: {
         type: String,
-        default: ""
-    }
-    
-},{
+        default: null // Change default value to null
+    },
+    friends: [{
+        id:{
+            type: String,
+            default: "" // Change default value to null
+        } ,
+        accepted: {
+            type: Boolean,
+            default: false,
+        },
+    }],
+}, {
     timestamps: true
 });
 

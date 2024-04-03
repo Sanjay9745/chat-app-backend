@@ -67,6 +67,15 @@ chat.use((socket, next) => {
 // Handle connections to the '/chat' namespace
 chat.on("connection", async (socket) => {
   console.log("New user connected to chat namespace");
+    try {
+      const user = await User.updateOne(
+        { _id: socket.user.id },
+        { is_online: "1", socket_id: socket.id }
+      );
+      socket.broadcast.emit("setUserOnline", socket.user.id);
+    } catch (error) {
+      console.log(error);
+    }
   socket.on("join", async (data) => {
     // Handle user connection logic
     console.log("join");
@@ -134,14 +143,27 @@ chat.on("connection", async (socket) => {
     socket.to(user.socket_id).emit("deleteAllChat", data);
   });
   //handle typing
-  socket.on("typing", (data) => {
+  socket.on("typing", async (data) => {
 
     // Broadcast the typing status to other clients
+    console.log(socket.id)
+    const user = await User.findOne({ socket_id: socket.id});
+      console.log(user);
     socket.broadcast.emit("typing", data);
   });
   
   // Handle disconnections
   socket.on("disconnect", async () => {
+    //get user id from socket
+    console.log(socket.id);
+   const user = await User.updateOne(
+      { socket_id: socket.id },
+      { is_online: "0", socket_id: null }
+    );
+    // // Update the user's online status to '0'
+    // await User.updateOne({ _id: user._id }, { is_online: "0" });
+    // // Broadcast the user's offline status to other clients
+    socket.broadcast.emit("setUserOffline", user._id);
     console.log("User disconnected from chat namespace");
   });
 });
