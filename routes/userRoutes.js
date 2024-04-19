@@ -9,7 +9,7 @@ router.get("/protected",userAuth,(req,res)=>{
 router.get('/get-all-users',userAuth,userController.getAllUsers);
 router.get('/get-friends',userAuth,userController.getFriends);
 router.get('/get-friend-requests',userAuth,userController.getAllFriendRequests);
-
+router.get('/details',userAuth,userController.GetUserDetails);
 
 router.post('/login',userController.Login);
 router.post('/register',userController.Register);

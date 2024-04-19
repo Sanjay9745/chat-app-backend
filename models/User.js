@@ -22,6 +22,10 @@ const userSchema = new Schema({
         type: String,
         default: null // Change default value to null
     },
+    latestOnline: {
+        type: Date,
+        default: Date.now
+    },
     friends: [{
         id:{
             type: String,

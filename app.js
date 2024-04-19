@@ -83,8 +83,9 @@ chat.on("connection", async (socket) => {
     try {
       const user = await User.updateOne(
         { _id: socket.user.id },
-        { is_online: "1", socket_id: socket.id }
+        { is_online: "1", socket_id: socket.id, latestOnline: Date.now()}
       );
+
       socket.broadcast.emit("setUserOnline", socket.user.id);
     } catch (error) {
       console.log(error);
